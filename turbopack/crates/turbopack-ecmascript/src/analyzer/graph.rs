@@ -403,11 +403,11 @@ impl EvalContext {
         }
         if is_unresolved(i, self.unresolved_mark) || self.force_free_values.contains(&id) {
             // Assume undefined is never shadowed by the global scope
-            if i.sym == "undefined" {
-                JsValue::Constant(ConstantValue::Undefined)
-            } else {
-                JsValue::FreeVar(i.sym.clone())
-            }
+            // if i.sym == "undefined" {
+            //     JsValue::Constant(ConstantValue::Undefined)
+            // } else {
+            JsValue::FreeVar(i.sym.clone())
+            // }
         } else {
             JsValue::Variable(id)
         }

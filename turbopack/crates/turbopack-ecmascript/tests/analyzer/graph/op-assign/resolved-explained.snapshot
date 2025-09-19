@@ -18,7 +18,7 @@ clientComponentLoadTimes = (0 | (???*0* + ???*1*))
 
 getClientComponentLoaderMetrics = (...) => metrics
 
-metrics = (???*0* ? undefined : {"clientComponentLoadTimes": (0 | ???*4*)})
+metrics = (???*0* ? ???*4* : {"clientComponentLoadTimes": (0 | ???*5*)})
 - *0* ((0 | ???*1*) === 0)
   ⚠️  nested operation
 - *1* (???*2* + ???*3*)
@@ -27,11 +27,14 @@ metrics = (???*0* ? undefined : {"clientComponentLoadTimes": (0 | ???*4*)})
   ⚠️  circular variable reference
 - *3* unsupported expression
   ⚠️  This value might have side effects
-- *4* (???*5* + ???*6*)
+- *4* FreeVar(undefined)
+  ⚠️  unknown global
+  ⚠️  This value might have side effects
+- *5* (???*6* + ???*7*)
   ⚠️  nested operation
-- *5* clientComponentLoadTimes
+- *6* clientComponentLoadTimes
   ⚠️  circular variable reference
-- *6* unsupported expression
+- *7* unsupported expression
   ⚠️  This value might have side effects
 
 options = ???*0*

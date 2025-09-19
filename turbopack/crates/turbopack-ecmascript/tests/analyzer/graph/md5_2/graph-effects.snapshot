@@ -28873,8 +28873,8 @@
                         ),
                     ),
                     StrictEqual,
-                    Constant(
-                        Undefined,
+                    FreeVar(
+                        "undefined",
                     ),
                 ),
                 Binary(
