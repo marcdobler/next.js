@@ -1804,20 +1804,15 @@ export async function copy_vendor_react(task_) {
       )
       // eslint-disable-next-line require-yield
       .run({ every: true }, function* (file) {
-        // We replace the module loading code with our own implementation in Next.js.
-        // NOTE: We only replace module loading for server builds because the server
-        // bundles have unique constraints like a runtime bundle. For browser builds this
-        // package will be bundled alongside user code and we don't need to introduce the extra
-        // indirection
-
         if (
-          (file.base.startsWith('react-server-dom-turbopack-client') ||
-            file.base.startsWith('react-server-dom-turbopack-server')) &&
-          !file.base.includes('.browser.')
+          file.base.startsWith('react-server-dom-turbopack-client') ||
+          file.base.startsWith('react-server-dom-turbopack-server')
         ) {
           let source = file.data.toString()
 
-          // Patch async modules support into `resolveServerReference`
+          // Workaround: patch support for async modules into `resolveServerReference`
+          // Needed until the React TODO is resolved:
+          // https://github.com/facebook/react/blob/5e0c951b58a98feed034e2bb92f25ae6d0616855/packages/react-server-dom-turbopack/src/client/ReactFlightClientConfigBundlerTurbopack.js#L135-L137
           if (file.base.startsWith('react-server-dom-turbopack-client')) {
             source = source.replace(
               `return [resolvedModuleData.id, resolvedModuleData.chunks, name];`,
@@ -1825,24 +1820,33 @@ export async function copy_vendor_react(task_) {
             )
           }
 
-          const filepath = file.dir + '/' + file.base
-          const ast = parseFile(source, { sourceFileName: filepath })
+          // We replace the module loading code with our own implementation in Next.js.
+          // NOTE: We only replace module loading for server builds because the server
+          // bundles have unique constraints like a runtime bundle. For browser builds this
+          // package will be bundled alongside user code and we don't need to introduce the extra
+          // indirection
+          if (!file.base.includes('.browser.')) {
+            const filepath = file.dir + '/' + file.base
+            const ast = parseFile(source, { sourceFileName: filepath })
 
-          replaceIdentifiersInAst(
-            ast,
-            new Map([
-              [
-                '__turbopack_load_by_url__',
-                parseExpression('globalThis.__next_chunk_load__'),
-              ],
-              [
-                '__turbopack_require__',
-                parseExpression('globalThis.__next_require__'),
-              ],
-            ])
-          )
+            replaceIdentifiersInAst(
+              ast,
+              new Map([
+                [
+                  '__turbopack_load_by_url__',
+                  parseExpression('globalThis.__next_chunk_load__'),
+                ],
+                [
+                  '__turbopack_require__',
+                  parseExpression('globalThis.__next_require__'),
+                ],
+              ])
+            )
 
-          file.data = recast.print(ast).code
+            source = recast.print(ast).code
+          }
+
+          file.data = source
         } else if (file.base === 'package.json') {
           file.data = overridePackageName(file.data)
         }
