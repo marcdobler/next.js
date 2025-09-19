@@ -1815,7 +1815,16 @@ export async function copy_vendor_react(task_) {
             file.base.startsWith('react-server-dom-turbopack-server')) &&
           !file.base.includes('.browser.')
         ) {
-          const source = file.data.toString()
+          let source = file.data.toString()
+
+          // Patch async modules support into `resolveServerReference`
+          if (file.base.startsWith('react-server-dom-turbopack-client')) {
+            source = source.replace(
+              `return [resolvedModuleData.id, resolvedModuleData.chunks, name];`,
+              `return resolvedModuleData.async ? [resolvedModuleData.id, resolvedModuleData.chunks, name, 1] : [resolvedModuleData.id, resolvedModuleData.chunks, name];`
+            )
+          }
+
           const filepath = file.dir + '/' + file.base
           const ast = parseFile(source, { sourceFileName: filepath })
 
