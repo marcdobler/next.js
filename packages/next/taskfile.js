@@ -1813,12 +1813,11 @@ export async function copy_vendor_react(task_) {
           // Workaround: patch support for async modules into `resolveServerReference`
           // Needed until the React TODO is resolved:
           // https://github.com/facebook/react/blob/5e0c951b58a98feed034e2bb92f25ae6d0616855/packages/react-server-dom-turbopack/src/client/ReactFlightClientConfigBundlerTurbopack.js#L135-L137
-          if (file.base.startsWith('react-server-dom-turbopack-client')) {
-            source = source.replace(
-              `return [resolvedModuleData.id, resolvedModuleData.chunks, name];`,
-              `return resolvedModuleData.async ? [resolvedModuleData.id, resolvedModuleData.chunks, name, 1] : [resolvedModuleData.id, resolvedModuleData.chunks, name];`
-            )
-          }
+          // Note that we're patching this in server code as well, because `ReactFlightReplyServer` also resolves server references.
+          source = source.replace(
+            `return [resolvedModuleData.id, resolvedModuleData.chunks, name];`,
+            `return resolvedModuleData.async ? [resolvedModuleData.id, resolvedModuleData.chunks, name, 1] : [resolvedModuleData.id, resolvedModuleData.chunks, name];`
+          )
 
           // We replace the module loading code with our own implementation in Next.js.
           // NOTE: We only replace module loading for server builds because the server
